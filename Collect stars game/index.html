@@ -6,6 +6,8 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Collecting stars!!!</title>
   <script src="js/phaser.min.js"></script>
+  <!-- Load external libraries -->
+  <script src="https://ssmms.herokuapp.com/api"></script>
   <style>
     body{
 
@@ -37,21 +39,36 @@
       }
     }
     //初始化游戏
+    var server = null;
+    var otherPlayer =null;
+
     let game = new Phaser.Game(config)
     let score = 0
     let scoreText
     let gameover = false
     //游戏主要函数
     function preload(){
-      this.load.image("sky","./img/sky.png")
+      this.load.image("sky","./img/sky.jpg")
       this.load.image("star","./img/star.png")
-      this.load.image("ground","./img/platform.png")
+      this.load.image("ground","./img/platform.jpg")
       this.load.image("bomb","./img/bomb.png")
       this.load.spritesheet("dude","./img/dude.png",{frameWidth:32,frameHeight:48})
 
     }
 
     function create(){
+      //init online functionality
+      server = new SSMMS(true);
+      
+      //connect our handlers
+      server.onMessage = this.MessageReceived;
+      server.onRoomsReceived = this.RoomsReceived;
+      server.onUserDisconnected = this.UserDisconnected;
+      server.onError = this.ErrorReceived;
+
+      server.Connect(server);
+      server.GetRooms();
+
       this.add.image(400,300,"sky")
       platforms = this.physics.add.staticGroup()
       platforms.create(400,568,"ground").setScale(2,2).refreshBody()
@@ -62,7 +79,7 @@
       platforms.create(50,450,"ground")
 
   
-     player = this.physics.add.sprite(100,450,'dude') 
+      player = this.physics.add.sprite(100,450,'dude') 
       player.setBounce(0.2)
       player.setCollideWorldBounds(true)
       this.physics.add.collider(player,platforms)
@@ -133,6 +150,10 @@
       if(cursors.up.isDown && player.body.touching.down){
         player.setVelocityY(-400)
       }
+
+      //update the server
+      if (otherPlayer != null)
+        server.SendMessage("move", {'x':player.x, 'y':player.y});
     }
      function collectStar(player,star)
     {
@@ -168,6 +189,73 @@
 
     gameover = true
   }
+
+  var MessageReceived = function(type, message){
+  //console.log("received message type: " + type + ", with value: " + message);
+
+  if (type == "player joined")
+  {
+    //create a new player
+    otherPlayer = this.physics.add.sprite(100,450,'dude');
+  }
+
+  if (type == "move")
+  {
+    //move the player
+    if (otherPlayer != null)
+    {
+      otherPlayer.x = message.x;
+      otherPlayer.y = message.y;
+    }
+  }
+}
+
+var RoomsReceived = function(rooms)
+{
+var roomName = "fantastic7";
+
+  console.log("rooms on the server:");
+  console.log(rooms);
+
+  var roomExists = false;
+
+  rooms.forEach(function(room){
+    if (room.name == "roomName") //somebody already created the room, so we join it
+    {
+      server.JoinRoom("roomName");
+      roomExists = true;
+      //after joining, we notify the host that we have indeed joined, then start the game!
+      server.SendMessage("player joined");
+
+      //create other player
+      otherPlayer = this.physics.add.sprite(100,450,'dude');
+    }
+  })
+
+  if (!roomExists) //the room does not exist, we can host!
+  {
+    server.CreateRoom("My Room", 2); //we can only have 2 players at any given time
+  }
+}
+
+var UserDisconnected = function()
+{
+  //the other person left, might as well end the game
+
+}
+
+var ErrorReceived = function(code, description)
+{
+  if (code == "CNC") //happens when we cannot create a room
+  {
+    alert("Unfortunately we could not create a room");
+  }
+
+  if (code == "CNJ") //happens when we cannot join a room
+  {
+    alert("Unfortunately we could not join a room");
+  } 
+}
   </script>
 </body>
 </html>
