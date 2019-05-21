@@ -1,0 +1,31 @@
+  function bombbbb()
+  {
+    this.physics.pause()
+
+    player.setTint(0x00ff00)
+    console.log("bombed");
+
+    player.anims.play("turn")
+
+    gameover = true
+  }
+
+  var MessageReceived = function(type, message){
+  //console.log("received message type: " + type + ", with value: " + message);
+
+  if (type == "player joined")
+  {
+    //create a new player
+    otherPlayer = game.config.scene.physics.add.sprite(100,450,'dude');
+  }
+
+  if (type == "move")
+  {
+    //move the player
+    if (otherPlayer != null)
+    {
+      otherPlayer.x = message.x;
+      otherPlayer.y = message.y;
+    }
+  }
+}
