@@ -1,0 +1,22 @@
+function releaseBall () {
+
+    if (ballOnPaddle)
+    {
+        ballOnPaddle = false;
+        ball.body.velocity.y = -300;
+        ball.body.velocity.x = -75;
+        ball.animations.play('spin');
+        introText.visible = false;
+    }
+
+}
+
+
+function gameOver () {
+
+    ball.body.velocity.setTo(0, 0);
+    
+    introText.text = 'Game Over!';
+    introText.visible = true;
+
+}
