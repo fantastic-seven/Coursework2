@@ -1,33 +1,15 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Collecting stars!!!</title>
-  <script src="js/phaser.min.js"></script>
-  <!-- Load external libraries -->
-  <script src="https://ssmms.herokuapp.com/api"></script>
-  <style>
-    body{
-
-    }
-  </style>
-</head>
-<body>
-  <script>
-    //生成配置文件
+  //生成配置文件
     const config = {
       //初始化游戏类型
       type : Phaser.AUTO,
-      width : 2000,
-      height : 1200,
+      width : 800,
+      height : 600,
       //物理引擎
       physics : {
         default : 'arcade',
         arcade : {
           //重力设置
-          gravity : {y : 450},
+          gravity : {y : 300},
           debug : false
         }
       },
@@ -38,6 +20,8 @@
         update
       }
     }
+
+   
     //初始化游戏
     var server = null;
     var otherPlayer =null;
@@ -46,42 +30,38 @@
     let score = 0
     let scoreText
     let gameover = false
-    //游戏主要函数
+//游戏主要函数
     function preload(){
-      this.load.image("sky","./img/gameb.jpg")
+      this.load.image("sky","./img/sky.jpg")
       this.load.image("star","./img/star.png")
-      this.load.image("ground","./img/plarform2.jpg")
+      this.load.image("ground","./img/platform.png")
       this.load.image("bomb","./img/bomb.png")
       this.load.spritesheet("dude","./img/dude.png",{frameWidth:32,frameHeight:48})
 
     }
 
     function create(){
+
       //init online functionality
       server = new SSMMS(true);
       
       //connect our handlers
-      server.onMessage = this.MessageReceived;
-      server.onRoomsReceived = this.RoomsReceived;
-      server.onUserDisconnected = this.UserDisconnected;
-      server.onError = this.ErrorReceived;
+      server.onMessage = MessageReceived;
+      server.onRoomsReceived = RoomsReceived;
+      server.onUserDisconnected = UserDisconnected;
+      server.onError = ErrorReceived;
 
       server.Connect(server);
       server.GetRooms();
 
       this.add.image(400,300,"sky")
       platforms = this.physics.add.staticGroup()
-      platforms.create(400,950,"ground").setScale(2,2).refreshBody()
-	  platforms.create(1500,950,"ground").setScale(2,2).refreshBody()
-	  
-      platforms.create(1000,500,"ground")
-      platforms.create(1200,650,"ground")
-      platforms.create(500,800,"ground")
-      platforms.create(430,150,"ground")
-      platforms.create(150,450,"ground")
-	  platforms.create(-200,300,"ground")
-	  platforms.create(2000,400,"ground")
-	  platforms.create(1850,550,"ground")
+      platforms.create(400,568,"ground").setScale(2,2).refreshBody()
+      platforms.create(600,400,"ground")
+      platforms.create(-10,300,"ground")
+      platforms.create(680,200,"ground")
+      platforms.create(0,100,"ground")
+      platforms.create(50,450,"ground")
 
   
       player = this.physics.add.sprite(100,450,'dude') 
@@ -114,8 +94,8 @@
 
       stars = this.physics.add.group({
         key : 'star',
-        repeat : 18,
-        setXY : {x: 20,y: 0,stepX:100}
+        repeat : 11,
+        setXY : {x: 20,y: 0,stepX:70}
       })
 
       stars.children.iterate(function(child){
@@ -126,7 +106,7 @@
       this.physics.add.collider(stars,platforms)
       this.physics.add.overlap(player,stars,collectStar,null,this)
       bombs = this.physics.add.group()
-      scoreText = this.add.text(16,16,"score : 0",{fontSize: '32px',fill: "white"})
+      scoreText = this.add.text(16,16,"score : 0",{fontSize: '32px',fill: "#000"})
       this.physics.add.collider(bombs,platforms)
       this.physics.add.collider(player,bombs,bombbbb,null,this)
     }
@@ -136,13 +116,13 @@
     {
       if(cursors.left.isDown)
       {
-        player.setVelocityX(-280)
+        player.setVelocityX(-50)
 
         player.anims.play("left",true)
       }
       else if(cursors.right.isDown)
       {
-        player.setVelocityX(280)
+        player.setVelocityX(50)
 
         player.anims.play("right",true)
       }
@@ -164,7 +144,7 @@
     {
       //让star实体消失
       star.disableBody(true,true)
-      score += 1
+      score += 100
       scoreText.setText("score :"+ score)
       if(stars.countActive(true) === 0)
       {
@@ -186,7 +166,6 @@
   {
     this.physics.pause()
 
-    //涂色，我觉得绿绿的比较好看
     player.setTint(0x00ff00)
     console.log("bombed");
 
@@ -201,7 +180,7 @@
   if (type == "player joined")
   {
     //create a new player
-    otherPlayer = this.physics.add.sprite(100,450,'dude');
+    otherPlayer = game.config.scene.physics.add.sprite(100,450,'dude');
   }
 
   if (type == "move")
@@ -217,7 +196,7 @@
 
 var RoomsReceived = function(rooms)
 {
-var roomName = "fantastic7";
+  var roomName = "fantastic7";
 
   console.log("rooms on the server:");
   console.log(rooms);
@@ -225,21 +204,21 @@ var roomName = "fantastic7";
   var roomExists = false;
 
   rooms.forEach(function(room){
-    if (room.name == "roomName") //somebody already created the room, so we join it
+    if (room.name == roomName) //somebody already created the room, so we join it
     {
-      server.JoinRoom("roomName");
+      server.JoinRoom(roomName);
       roomExists = true;
       //after joining, we notify the host that we have indeed joined, then start the game!
       server.SendMessage("player joined");
 
       //create other player
-      otherPlayer = this.physics.add.sprite(100,450,'dude');
+      otherPlayer = game.config.scene.physics.add.sprite(100,450,'dude');
     }
   })
 
   if (!roomExists) //the room does not exist, we can host!
   {
-    server.CreateRoom("My Room", 2); //we can only have 2 players at any given time
+    server.CreateRoom(roomName, 2); //we can only have 2 players at any given time
   }
 }
 
@@ -261,6 +240,3 @@ var ErrorReceived = function(code, description)
     alert("Unfortunately we could not join a room");
   } 
 }
-  </script>
-</body>
-</html>
