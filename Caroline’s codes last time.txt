@@ -1,0 +1,19 @@
+function ballLost () {
+
+    lives--;
+    livesText.text = 'lives: ' + lives;
+
+    if (lives === 0)
+    {
+        gameOver();
+    }
+    else
+    {
+        ballOnPaddle = true;
+
+        ball.reset(paddle.body.x + 16, paddle.y - 16);
+        
+        ball.animations.stop();
+    }
+
+}
