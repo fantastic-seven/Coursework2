@@ -1,3 +1,4 @@
+Theses are Monica's codes for our Coursework2 game: Collecting stars!!!
 function preload(){
       this.load.image("sky","./img/sky.jpg")
       this.load.image("star","./img/star.png")
@@ -22,3 +23,32 @@ var ErrorReceived = function(code, description)
   {
     alert("Unfortunately we could not join a room");
   }
+
+Theses are Monica's codes for our Coursework2 first but failed game: Breakout!!!
+function update () {
+
+    //  Fun, but a little sea-sick inducing :) Uncomment if you like!
+    // s.tilePosition.x += (game.input.speed.x / 2);
+
+    paddle.x = game.input.x;
+
+    if (paddle.x < 24)
+    {
+        paddle.x = 24;
+    }
+    else if (paddle.x > game.width - 24)
+    {
+        paddle.x = game.width - 24;
+    }
+
+    if (ballOnPaddle)
+    {
+        ball.body.x = paddle.x;
+    }
+    else
+    {
+        game.physics.arcade.collide(ball, paddle, ballHitPaddle, null, this);
+        game.physics.arcade.collide(ball, bricks, ballHitBrick, null, this);
+    }
+
+}
