@@ -1,0 +1,27 @@
+var RoomsReceived = function(rooms)
+{
+  var roomName = "fantastic7";
+
+  console.log("rooms on the server:");
+  console.log(rooms);
+
+  var roomExists = false;
+
+  rooms.forEach(function(room){
+    if (room.name == roomName) //somebody already created the room, so we join it
+    {
+      server.JoinRoom(roomName);
+      roomExists = true;
+      //after joining, we notify the host that we have indeed joined, then start the game!
+      server.SendMessage("player joined");
+
+      //create other player
+      otherPlayer = game.config.scene.physics.add.sprite(100,450,'dude');
+    }
+  })
+
+  if (!roomExists) //the room does not exist, we can host!
+  {
+    server.CreateRoom(roomName, 2); //we can only have 2 players at any given time
+  }
+}

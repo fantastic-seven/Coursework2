@@ -1,0 +1,24 @@
+function preload(){
+      this.load.image("sky","./img/sky.jpg")
+      this.load.image("star","./img/star.png")
+      this.load.image("ground","./img/platform.png")
+      this.load.image("bomb","./img/bomb.png")
+      this.load.spritesheet("dude","./img/dude.png",{frameWidth:32,frameHeight:48})
+
+var UserDisconnected = function()
+{
+  //the other person left, might as well end the game
+
+}
+
+var ErrorReceived = function(code, description)
+{
+  if (code == "CNC") //happens when we cannot create a room
+  {
+    alert("Unfortunately we could not create a room");
+  }
+
+  if (code == "CNJ") //happens when we cannot join a room
+  {
+    alert("Unfortunately we could not join a room");
+  }
